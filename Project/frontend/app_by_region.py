@@ -1,8 +1,11 @@
+from collections import Counter
+
 import streamlit as st
-import requests
+from appelApi import get_prediction,get_model_info
 from datetime import datetime
 import pandas as pd
-
+from barreLateralGauche import plotLatteralGauche
+from presentationDelaDonneFiltre import presentationData
 # Configuration de la page
 st.set_page_config(
     page_title="Prédiction Production d'Arachides",
@@ -10,30 +13,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# Fonction pour faire une prédiction via l'API
-def get_prediction(superficie: float, pluie: float) -> dict:
-    try:
-        response = requests.post(
-            "http://localhost:8000/predict",
-            json={"superficie": superficie, "pluie": pluie}
-        )
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Erreur lors de la connexion à l'API: {str(e)}")
-        return None
 
-# Fonction pour obtenir les informations du modèle
-def get_model_info():
-    try:
-        response = requests.get("http://localhost:8000/model-info")
-        return response.json()
-    except requests.exceptions.RequestException:
-        return None
 
 # Initialisation de l'historique des prédictions
 if 'prediction_history' not in st.session_state:
     st.session_state.prediction_history = []
-
 
 # Styles CSS
 st.markdown(
@@ -58,32 +42,22 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+dataObservation = pd.read_csv("../../data/observation_indicateurs_regions_cereal.csv")
+dataObservation["Date"] = dataObservation["Date"].apply(int)
+dataObservation["Value"] = dataObservation["Value"].apply(lambda v: int(str(v).replace(" ", "").replace("u202f", "")))
+cols = ["indicateur", "région", "céréales", "Date"]
+
+kpi = {k: sorted(dataObservation[k].unique()) for k in cols}
 
 # Interface utilisateur
-st.markdown("<h1 class='main-header'>🥜 Prédiction de la Production d'Arachides</h1>", unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("<h2 class='sub-header'>ℹ️ Informations sur le modèle</h2>", unsafe_allow_html=True)
-    model_info = get_model_info()
-    if model_info:
-        st.write("Type de modèle:", model_info["model_type"])
-        st.write("Variables utilisées:")
-        for feature in model_info["features"]:
-            st.write(f"- {feature}")
-        st.markdown("### Coefficients du modèle")
-        coef_df = pd.DataFrame({
-            'Variable': ['Superficie', 'Pluie', 'Constante'],
-            'Coefficient': [
-                model_info['coefficients']['superficie'],
-                model_info['coefficients']['pluie'],
-                model_info['coefficients']['intercept']
-            ]
-        })
-        st.dataframe(coef_df)
-    else:
-        st.warning("Impossible de charger les informations du modèle")
+    regCheck = plotLatteralGauche(st,kpi) # Permet de recuperer les valeurs des checkbox
 
-col1, col2 ,col3= st.columns([1,3,1])
+presentationData(regCheck = regCheck,dataObservation=dataObservation,st=st)
+
+
+col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("<h3 class='sub-header'>📊 Entrée des données</h3>", unsafe_allow_html=True)
@@ -156,6 +130,3 @@ if st.session_state.prediction_history:
         file_name=f'historique_predictions_{datetime.now().strftime("%Y%m%d")}.csv',
         mime='text/csv'
     )
-
-with col3 :
-    st.markdown('<div class="column-right">Contenu de la colonne droite</div>', unsafe_allow_html=True)

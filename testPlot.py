@@ -1,6 +1,10 @@
-import plotly.graph_objects as go
-fig = go.Figure(
-    data=[go.Bar(y=[2, 1, 3])],
-    layout_title_text="A Figure Displayed with fig.show()"
-)
-fig.show()
+import pandas as pd
+from collections import Counter
+#dataObservation = pd.read_csv("../data/observation_indicateurs_regions_cereal.csv")
+dataObservation = pd.read_csv("data/observation_indicateurs_regions_cereal.csv")
+dataObservation["Date"] = dataObservation["Date"].apply(int)
+cols = ["région","céréales","Date"]
+
+kpi= {k : sorted(dataObservation[k].unique()) for k in cols}
+
+print(kpi)

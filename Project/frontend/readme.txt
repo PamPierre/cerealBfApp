@@ -17,4 +17,5 @@ uvicorn main:app --reload
 
 
 cd frontend
-streamlit run app.py
+streamlit run app.py --Old
+streamlit run app_by_region.py -- New

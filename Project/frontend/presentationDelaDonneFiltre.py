@@ -51,6 +51,21 @@ def presentationData(regCheck,dataObservation,st):
     showData, chartData = st.columns(2)
     with showData:
         st.dataframe(dataObservationForFront[default].head(30), hide_index=True)
+        # Regrouper les données par 'Value' et calculer des statistiques (par exemple, la somme)
+        grouped_data = (
+            dataObservationForFront.groupby("Value")
+            .agg({"région": "count", "céréales": "nunique", "Date": "min"})
+            .rename(columns={
+                "région": "Nombre de régions",
+                "céréales": "Nombre de types de céréales",
+                "Date": "Première date"
+            })
+            .reset_index()
+        )
+
+        # Afficher les données groupées dans Streamlit
+        #st.write("### Données regroupées par `Value`")
+        #st.dataframe(grouped_data.head(30), hide_index=True)
 
     with chartData:
         chart = alt.Chart(dataObservationForFront).mark_bar().encode(

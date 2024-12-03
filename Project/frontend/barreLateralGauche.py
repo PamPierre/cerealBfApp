@@ -10,7 +10,7 @@ def plotLatteralGauche(st,kpi):
         st.write("Variables")
         for k, v in kpi.items():
             with st.expander(f"📋 Liste des {k} (cliquez pour dérouler)"):
-                regCheck[k] = {i: st.checkbox(f"{i}", value=False) for i in v}
+                regCheck[k] = {i: st.checkbox(f"{i}", value=True if i in ["Evolution de la production par région selon le type de céréales","Burkina Faso","Arachide"]+kpi["Date"][-5:] else False) for i in v}
         st.markdown("### Coefficients du modèle")
         coef_df = pd.DataFrame({
             'Variable': ['Superficie', 'Pluie', 'Constante'],

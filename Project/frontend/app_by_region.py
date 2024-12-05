@@ -43,11 +43,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 dataObservation = pd.read_csv("../../data/observation_indicateurs_regions_cereal.csv")
+dataObservationMerge = pd.read_csv("../../data/all_cereal_merge.csv")
+
+listKeyVal = ['Date', 'Superficie', 'Production', 'Pluie par année']
 dataObservation["Date"] = dataObservation["Date"].apply(int)
 dataObservation["Value"] = dataObservation["Value"].apply(lambda v: int(str(v).replace(" ", "").replace("u202f", "")))
+for l in listKeyVal:
+    dataObservationMerge[l] = dataObservationMerge[l].apply(
+        lambda v: int(str(v).replace(" ", "").replace("u202f", "")))
+dataObservation = dataObservationMerge.copy()
+
 cols = ["indicateur", "région", "céréales", "Date"]
 
-kpi = {k: sorted(dataObservation[k].unique()) for k in cols}
+kpi = {k: sorted(dataObservation[k].unique()) for k in cols if k in dataObservation.keys()}
 
 # Interface utilisateur
 

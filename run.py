@@ -26,3 +26,13 @@ fig = ff.create_distplot(hist_data,group_labels = hist_data["Année"])
 
 # Plot!
 st.plotly_chart(fig, use_container_width=True)
+
+""" my_circular_progress = CircularProgress(
+                        label="Sample Bar",
+                        value=0,
+                        key="my_circular_progress")
+my_circular_progress.st_circular_progress()
+for i in range(100):
+    my_circular_progress.update_value(progress=i)
+    #time.sleep(0.3)
+"""

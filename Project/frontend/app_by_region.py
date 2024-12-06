@@ -6,6 +6,9 @@ from datetime import datetime
 import pandas as pd
 from barreLateralGauche import plotLatteralGauche
 from presentationDelaDonneFiltre import presentationData
+from st_circular_progress import CircularProgress
+import time
+
 # Configuration de la page
 st.set_page_config(
     page_title="Prédiction Production d'Arachides",
@@ -48,6 +51,7 @@ dataObservationMerge = pd.read_csv("../../data/all_cereal_merge.csv")
 listKeyVal = ['Date', 'Superficie', 'Production', 'Pluie par année']
 dataObservation["Date"] = dataObservation["Date"].apply(int)
 dataObservation["Value"] = dataObservation["Value"].apply(lambda v: int(str(v).replace(" ", "").replace("u202f", "")))
+
 for l in listKeyVal:
     dataObservationMerge[l] = dataObservationMerge[l].apply(
         lambda v: int(str(v).replace(" ", "").replace("u202f", "")))
@@ -58,7 +62,6 @@ cols = ["indicateur", "région", "céréales", "Date"]
 kpi = {k: sorted(dataObservation[k].unique()) for k in cols if k in dataObservation.keys()}
 
 # Interface utilisateur
-
 with st.sidebar:
     regCheck = plotLatteralGauche(st,kpi) # Permet de recuperer les valeurs des checkbox
 
@@ -69,16 +72,20 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("<h3 class='sub-header'>📊 Entrée des données</h3>", unsafe_allow_html=True)
+    with st.expander(f"Choix de la région"):
+        region_radio = st.radio("Région",kpi["région"])
+    with st.expander(f"Choix du céréal a prédire"):
+        cereal_radio = st.radio("céréales",kpi["céréales"])
     superficie = st.number_input(
-        "Superficie (hectares)",
-        min_value=1000.0,
+        "Superficie (ha)",
+        min_value=1.0,
         max_value=1000000.0,
         value=485703.0,
-        step=1000.0,
+        step=10.0,
         format="%f"
     )
     pluie = st.number_input(
-        "Pluviométrie (mm)",
+        "Pluviométrie (Nombre de pluie par année)",
         min_value=0.0,
         max_value=2000.0,
         value=723.0,
@@ -90,7 +97,7 @@ with col2:
     st.markdown("<h3 class='sub-header'>🎯 Résultats de la prédiction</h3>", unsafe_allow_html=True)
     if st.button("Faire une prédiction", type="primary"):
         with st.spinner("Calcul de la prédiction en cours..."):
-            prediction = get_prediction(superficie, pluie)
+            prediction = get_prediction(region=region_radio,cereal=cereal_radio,superficie=superficie, pluie=pluie)
             if prediction:
                 st.markdown("<div class='prediction-box'>", unsafe_allow_html=True)
                 st.metric(
@@ -103,6 +110,8 @@ with col2:
                 # Ajout de la prédiction à l'historique
                 new_prediction = {
                     'timestamp': prediction['timestamp'],
+                    'Région' : region_radio,
+                    'Céreal' : cereal_radio,
                     'superficie': superficie,
                     'pluie': pluie,
                     'prediction': prediction['prediction']

@@ -17,7 +17,7 @@ def plotLatteralGauche(st,kpi):
             'Coefficient': [
                 model_info['coefficients']['superficie'],
                 model_info['coefficients']['pluie'],
-                model_info['coefficients']['intercept']
+                model_info['coefficients']['R²']
             ]
         })
         st.dataframe(coef_df)

@@ -1,12 +1,16 @@
 import requests
 import streamlit as st
 
+
 # Fonction pour faire une prédiction via l'API
-def get_prediction(superficie: float, pluie: float) -> dict:
+def get_prediction(region: str, cereal: str, superficie: int, pluie: int) -> dict:
     try:
         response = requests.post(
             "http://localhost:8000/predict",
-            json={"superficie": superficie, "pluie": pluie}
+            json={"region": region,
+                  "cereal": cereal,
+                  "superficie": superficie,
+                  "pluie": pluie}
         )
         return response.json()
     except requests.exceptions.RequestException as e:
